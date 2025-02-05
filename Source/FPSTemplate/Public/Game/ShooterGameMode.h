@@ -21,7 +21,10 @@ public:
 	AShooterGameMode();
 protected:
 	virtual void BeginPlay() override;
+
 private:
 	FProcessParameters ProcessParameters;
 	void InitGameLift();
+	void SetServerParameters(FServerParameters& OutServerParameters);
+	void ParseCommandLinePort(int32& OutPort);
 };
