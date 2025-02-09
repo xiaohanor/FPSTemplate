@@ -4,21 +4,21 @@
 
 #include "CoreMinimal.h"
 #include "GameLiftServerSDK.h"
-#include "ShooterGameModeBase.h"
-#include "ShooterGameMode.generated.h"
-
-DECLARE_LOG_CATEGORY_EXTERN(LogShooterGameMode, Log, All);
+#include "GameFramework/GameMode.h"
+#include "DS_GameMode.generated.h"
 
 /**
  * 
  */
+
+DECLARE_LOG_CATEGORY_EXTERN(LogDS_GameMode, Log, All);
+
 UCLASS()
-class FPSTEMPLATE_API AShooterGameMode : public AShooterGameModeBase
+class DEDICATEDSERVERS_API ADS_GameMode : public AGameMode
 {
 	GENERATED_BODY()
-
 public:
-	AShooterGameMode();
+
 protected:
 	virtual void BeginPlay() override;
 
