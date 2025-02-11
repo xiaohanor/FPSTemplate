@@ -30,12 +30,26 @@ void UAPITestManager::OnListFleetClicked()
 void UAPITestManager::ListFleets_Response(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
 {
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("ListFleets_Response"));
-
 	
 	TSharedPtr<FJsonObject> JsonObject;
 	TSharedRef<TJsonReader<>> JsonReader = TJsonReaderFactory<>::Create(Response->GetContentAsString());
 	if (FJsonSerializer::Deserialize(JsonReader, JsonObject))
 	{
+		if (JsonObject->HasField(TEXT("errorType")) || JsonObject->HasField(TEXT("errorMessage")))
+		{
+			FString ErrorType = JsonObject->HasField(TEXT("errorType")) ? JsonObject->GetStringField(TEXT("errorType")) : TEXT("未知错误");
+			FString ErrorMessage = JsonObject->HasField(TEXT("errorMessage")) ? JsonObject->GetStringField(TEXT("errorMessage")) : TEXT("未知错误信息");
+			UE_LOG(LogDedicatedServers, Error, TEXT("错误类型: %s"), *ErrorType);
+			UE_LOG(LogDedicatedServers, Error, TEXT("错误信息: %s"), *ErrorMessage);
+			return;
+		}
+		if (JsonObject->HasField(TEXT("$fault")))
+		{
+			FString ErrorType = JsonObject->HasField(TEXT("name")) ? JsonObject->GetStringField(TEXT("name")) : TEXT("未知错误");
+			UE_LOG(LogDedicatedServers, Error, TEXT("Error Type: %s"), *ErrorType);
+			return;
+		}
+		
 		if (JsonObject->HasField(TEXT("$metadata")))
 		{
 			TSharedPtr<FJsonObject> MetaDataJsonObject = JsonObject->GetObjectField(TEXT("$metadata"));
