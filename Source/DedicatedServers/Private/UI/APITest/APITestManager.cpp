@@ -4,7 +4,10 @@
 #include "UI/APITest/APITestManager.h"
 
 #include "HttpModule.h"
+#include "JsonObjectConverter.h"
 #include "Data/APIData.h"
+#include "Interfaces/IHttpResponse.h"
+#include "UI/HTTP/HTTPRequestTypes.h"
 
 void UAPITestManager::OnListFleetClicked()
 {
@@ -28,4 +31,22 @@ void UAPITestManager::ListFleets_Response(FHttpRequestPtr Request, FHttpResponse
 {
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("ListFleets_Response"));
 
+	
+	TSharedPtr<FJsonObject> JsonObject;
+	TSharedRef<TJsonReader<>> JsonReader = TJsonReaderFactory<>::Create(Response->GetContentAsString());
+	if (FJsonSerializer::Deserialize(JsonReader, JsonObject))
+	{
+		if (JsonObject->HasField(TEXT("$metadata")))
+		{
+			TSharedPtr<FJsonObject> MetaDataJsonObject = JsonObject->GetObjectField(TEXT("$metadata"));
+			FDMetaData MetaData;
+			FJsonObjectConverter::JsonObjectToUStruct(MetaDataJsonObject.ToSharedRef(), &MetaData, 0, 0);
+
+			MetaData.Dump();
+		}
+
+		FDSListFleetsResponse ListFleetsResponse;
+		FJsonObjectConverter::JsonObjectToUStruct(JsonObject.ToSharedRef(), &ListFleetsResponse, 0, 0);
+		ListFleetsResponse.Dump();
+	}
 }
