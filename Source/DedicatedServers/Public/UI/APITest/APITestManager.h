@@ -17,7 +17,10 @@ class DEDICATEDSERVERS_API UAPITestManager : public UHTTPRequestManager
 
 public:
 	UFUNCTION()
-	void OnListFleetClicked();
+	void ListFleets();
+
+	UPROPERTY()
+	FOnListFleetsResponseReceived OnListFleetsResponseReceived;
 
 	void ListFleets_Response(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);
 };

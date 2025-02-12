@@ -6,6 +6,8 @@
 #include "UObject/Object.h"
 #include "HTTPRequestManager.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnListFleetsResponseReceived, const FDSListFleetsResponse&, ListFleetsResponse, bool, bWasSuccessful);
+
 class UAPIData;
 /**
  * 
@@ -15,7 +17,11 @@ class DEDICATEDSERVERS_API UHTTPRequestManager : public UObject
 {
 	GENERATED_BODY()
 
+
 protected:
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<UAPIData> APIData;
+
+	bool ContainsError(const TSharedPtr<FJsonObject>& JsonObject) const;
+	void DumpMetaData(const TSharedPtr<FJsonObject>& JsonObject) const;
 };
