@@ -18,7 +18,6 @@ class DEDICATEDSERVERS_API USignUpPage : public UUserWidget
 	GENERATED_BODY()
 
 public:
-
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UEditableTextBox> TextBox_UserName;
 
@@ -39,4 +38,14 @@ public:
 
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UTextBlock> TextBlock_StatusMessage;
+
+protected:
+	virtual void NativeConstruct() override;
+
+private:
+	UFUNCTION()
+	void UpdateSignUpButtonState(const FText& Text);
+
+	bool IsValidEmail(const FString& Email);
+	bool IsStrongPassword(const FString& Password, FString& StatusMessage);
 };
