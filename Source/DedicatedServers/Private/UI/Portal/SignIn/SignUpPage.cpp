@@ -27,25 +27,25 @@ void USignUpPage::UpdateSignUpButtonState(const FText& Text)
 
 	FString StatusMessage;
 	const bool bIsStrongPassword = IsStrongPassword(TextBox_Password->GetText().ToString(), StatusMessage);
-	if (!bIsStrongPassword)
+	if (!bIsValidEmail)
 	{
-		TextBlock_StatusMessage->SetText(FText::FromString(StatusMessage));
+		TextBlock_StatusMessage->SetText(FText::FromString(TEXT("请输入有效的邮箱地址。")));
 	}
 	else if (!bIsUsernameValid)
 	{
 		TextBlock_StatusMessage->SetText(FText::FromString(TEXT("请输入有效的用户名。")));
 	}
-	else if (!bArePasswordsEqual)
-	{
-		TextBlock_StatusMessage->SetText(FText::FromString(TEXT("密码不匹配。")));
-	}
-	else if (!bIsValidEmail)
-	{
-		TextBlock_StatusMessage->SetText(FText::FromString(TEXT("请输入有效的邮箱地址。")));
-	}
 	else if (!bIsPasswordLongEnough)
 	{
 		TextBlock_StatusMessage->SetText(FText::FromString(TEXT("密码长度至少为8个字符。")));
+	}
+	else if (!bIsStrongPassword)
+	{
+		TextBlock_StatusMessage->SetText(FText::FromString(StatusMessage));
+	}
+	else if (!bArePasswordsEqual)
+	{
+		TextBlock_StatusMessage->SetText(FText::FromString(TEXT("密码不匹配。")));
 	}
 	else
 	{
