@@ -36,4 +36,9 @@ public:
 	 */
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UTextBlock> TextBlock_Destination;
+
+	UFUNCTION()
+	void UpdateStatusMessage(const FString& Message, bool bShouldResetWidgets);
+
+	void ClearTextBoxes();
 };
