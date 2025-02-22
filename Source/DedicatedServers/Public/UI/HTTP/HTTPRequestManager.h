@@ -7,6 +7,7 @@
 #include "HTTPRequestManager.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnListFleetsResponseReceived, const FDSListFleetsResponse&, ListFleetsResponse, bool, bWasSuccessful);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FAPIStatusMessage, const FString&, StatusMessage, bool, bShouldResetWidgets);
 
 class UAPIData;
 /**
@@ -21,6 +22,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<UAPIData> APIData;
 
-	bool ContainsError(const TSharedPtr<FJsonObject>& JsonObject) const;
+	bool ContainsErrors(const TSharedPtr<FJsonObject>& JsonObject) const;
 	void DumpMetaData(const TSharedPtr<FJsonObject>& JsonObject) const;
+	
+	FString SerializeJsonContent(const TMap<FString, FString>& Params);
+
 };

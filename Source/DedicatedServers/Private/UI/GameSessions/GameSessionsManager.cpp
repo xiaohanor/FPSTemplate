@@ -5,5 +5,5 @@
 
 void UGameSessionsManager::JoinGameSession()
 {
-	BroadcastJoinGameSession.Broadcast(TEXT("搜索游戏会话中..."));
+	BroadcastJoinGameSession.Broadcast(TEXT("搜索游戏会话中..."), false);
 }

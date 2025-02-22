@@ -61,9 +61,6 @@ private:
 	TObjectPtr<UButton> Button_SuccessConfirmed_Test;
 
 	UFUNCTION()
-	void UpdateJoinGameStatusMessage(const FString& StatusMessage);
-
-	UFUNCTION()
 	void ShowSignInPage();
 
 	UFUNCTION()

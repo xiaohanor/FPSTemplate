@@ -5,6 +5,6 @@
 
 FString UAPIData::GetAPIEndpoint(const FGameplayTag& APIEndpoint)
 {
-	const FString RescourceName = Resource.FindChecked(APIEndpoint);
-	return InvokeURL + "/" + Stage + "/" + RescourceName;
+	const FString ResourceName = Resource.FindChecked(APIEndpoint);
+	return InvokeURL + "/" + Stage + "/" + ResourceName;
 }
