@@ -5,11 +5,6 @@
 
 #include "Kismet/KismetSystemLibrary.h"
 
-void UPortalManager::JoinGameSession()
-{
-	BroadcastJoinGameSession.Broadcast(TEXT("搜索游戏会话中..."));
-}
-
 void UPortalManager::SignIn(const FString& Username, const FString& Password)
 {
 }
