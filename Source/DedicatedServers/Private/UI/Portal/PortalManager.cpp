@@ -9,12 +9,13 @@
 #include "Interfaces/IHttpResponse.h"
 #include "GameplayTags/DedicatedServersTags.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "Player/DSLocalPlayerSubsystem.h"
 #include "UI/HTTP/HTTPRequestTypes.h"
 
 void UPortalManager::SignIn(const FString& Username, const FString& Password)
 {
 	check(APIData);
-	SignUpStatusMessageDelegate.Broadcast(TEXT("登录中..."), false);
+	SignInStatusMessageDelegate.Broadcast(TEXT("登录中..."), false);
 	TSharedRef<IHttpRequest> Request = FHttpModule::Get().CreateRequest();
 	Request->OnProcessRequestComplete().BindUObject(this, &UPortalManager::SignIn_Response);
 	const FString APIUrl = APIData->GetAPIEndpoint(DedicatedServersTags::PortalAPI::SignIn);
@@ -51,6 +52,13 @@ void UPortalManager::SignIn_Response(FHttpRequestPtr Request, FHttpResponsePtr R
 
 		FDSInitiateAuthResponse InitiateAuthResponse;
 		FJsonObjectConverter::JsonObjectToUStruct(JsonObject.ToSharedRef(), &InitiateAuthResponse);
+
+		// 将认证结果传递给DSLocalPlayerSubsystem持久化保存
+		UDSLocalPlayerSubsystem* DSLocalPlayerSubsystem = GetDSLocalPlayerSubsystem();
+		if (IsValid(DSLocalPlayerSubsystem))
+		{
+			DSLocalPlayerSubsystem->InitializeTokens(InitiateAuthResponse.AuthenticationResult, this);
+		}
 	}
 }
 
@@ -89,6 +97,15 @@ void UPortalManager::SignUp_Response(FHttpRequestPtr Request, FHttpResponsePtr R
 	{
 		if (ContainsErrors(JsonObject))
 		{
+			if (JsonObject->HasField(TEXT("name")))
+			{
+				FString Exception = JsonObject->GetStringField(TEXT("name"));
+				if (Exception.Equals(TEXT("UserLambdaValidationException")))
+				{
+					SignUpStatusMessageDelegate.Broadcast(TEXT("邮箱已被使用"), true);
+					return;
+				}
+			}
 			SignUpStatusMessageDelegate.Broadcast(HTTPStatusMessages::SomethingWentWrong, true);
 			return;
 		}
@@ -143,8 +160,48 @@ void UPortalManager::Confirm_Response(FHttpRequestPtr Request, FHttpResponsePtr 
 			ConfirmStatusMessageDelegate.Broadcast(HTTPStatusMessages::SomethingWentWrong, true);
 			return;
 		}
+		ConfirmSucceededDelegate.Broadcast();
 	}
-	ConfirmSucceededDelegate.Broadcast();
+}
+
+void UPortalManager::RefreshTokens(const FString& RefreshToken)
+{
+	check(APIData);
+	TSharedRef<IHttpRequest> Request = FHttpModule::Get().CreateRequest();
+	Request->OnProcessRequestComplete().BindUObject(this, &UPortalManager::RefreshTokens_Response);
+	const FString APIUrl = APIData->GetAPIEndpoint(DedicatedServersTags::PortalAPI::SignIn);
+	Request->SetURL(APIUrl);
+	Request->SetVerb(TEXT("POST"));
+	Request->SetHeader(TEXT("Content-Type"), TEXT("application/json"));
+
+	TMap<FString, FString> Params = {
+		{ TEXT("refreshToken"), RefreshToken },
+	};
+	const FString Content = SerializeJsonContent(Params);
+	Request->SetContentAsString(Content);
+	Request->ProcessRequest();
+}
+
+void UPortalManager::RefreshTokens_Response(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
+{
+	if (!bWasSuccessful) return;
+	
+	TSharedPtr<FJsonObject> JsonObject;
+	TSharedRef<TJsonReader<>> JsonReader = TJsonReaderFactory<>::Create(Response->GetContentAsString());
+	if (FJsonSerializer::Deserialize(JsonReader, JsonObject))
+	{
+		if (ContainsErrors(JsonObject)) return;
+	}
+
+	FDSInitiateAuthResponse InitiateAuthResponse;
+	FJsonObjectConverter::JsonObjectToUStruct(JsonObject.ToSharedRef(), &InitiateAuthResponse);
+	
+	UDSLocalPlayerSubsystem* DSLocalPlayerSubsystem = GetDSLocalPlayerSubsystem();
+	if (IsValid(DSLocalPlayerSubsystem))
+	{
+		// 更新Token
+		DSLocalPlayerSubsystem->UpdatedTokens(InitiateAuthResponse.AuthenticationResult.AccessToken, InitiateAuthResponse.AuthenticationResult.IdToken);
+	}
 }
 
 void UPortalManager::QuitGame()

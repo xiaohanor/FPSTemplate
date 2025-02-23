@@ -64,6 +64,7 @@ void USignInOverlay::SignInButtonClicked()
 {
 	const FString Username = SignInPage->TextBox_UserName->GetText().ToString();
 	const FString Password = SignInPage->TextBox_Password->GetText().ToString();
+	SignInPage->Button_SignIn->SetIsEnabled(false);
 	PortalManager->SignIn(Username, Password);
 }
 
