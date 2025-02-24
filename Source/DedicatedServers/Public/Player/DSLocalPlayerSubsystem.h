@@ -26,8 +26,7 @@ private:
 
 	UPROPERTY()
 	TScriptInterface<IPortalManagement> PortalManagementInterface;
-
-	// Token刷新间隔
-	float TokenRefreshInterval = 1.0f;
+	
+	float TokenRefreshInterval = 2700.0f; // Token刷新间隔 45分钟
 	FTimerHandle TokenRefreshTimer;
 };

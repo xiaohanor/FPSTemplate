@@ -11,6 +11,7 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "Player/DSLocalPlayerSubsystem.h"
 #include "UI/HTTP/HTTPRequestTypes.h"
+#include "UI/Portal/PortalHUD.h"
 
 void UPortalManager::SignIn(const FString& Username, const FString& Password)
 {
@@ -53,11 +54,22 @@ void UPortalManager::SignIn_Response(FHttpRequestPtr Request, FHttpResponsePtr R
 		FDSInitiateAuthResponse InitiateAuthResponse;
 		FJsonObjectConverter::JsonObjectToUStruct(JsonObject.ToSharedRef(), &InitiateAuthResponse);
 
-		// 将认证结果传递给DSLocalPlayerSubsystem持久化保存
+		// 将认证结果传递给 DSLocalPlayerSubsystem 持久化保存
 		UDSLocalPlayerSubsystem* DSLocalPlayerSubsystem = GetDSLocalPlayerSubsystem();
 		if (IsValid(DSLocalPlayerSubsystem))
 		{
 			DSLocalPlayerSubsystem->InitializeTokens(InitiateAuthResponse.AuthenticationResult, this);
+		}
+
+		// 登录成功后切换到 Dashboard 页面
+		APlayerController* LocalPlayerController = GEngine->GetFirstLocalPlayerController(GetWorld());
+		if (IsValid(LocalPlayerController))
+		{
+			APortalHUD* PortalHUD = Cast<APortalHUD>(LocalPlayerController->GetHUD());
+			if (IsValid(PortalHUD))
+			{
+				PortalHUD->SignIn();
+			}
 		}
 	}
 }
