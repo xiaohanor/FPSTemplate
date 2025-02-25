@@ -31,3 +31,8 @@ void UDSLocalPlayerSubsystem::UpdatedTokens(const FString& AccessToken, const FS
 	AuthenticationResult.Dump();
 	RefreshTokenTimer();
 }
+
+FDSAuthenticationResult UDSLocalPlayerSubsystem::GetAuthResult() const
+{
+	return AuthenticationResult;
+}

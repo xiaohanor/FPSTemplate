@@ -20,6 +20,7 @@ public:
 	void InitializeTokens(const FDSAuthenticationResult& AuthResult, TScriptInterface<IPortalManagement> PortalManagement);
 	void RefreshTokenTimer();
 	void UpdatedTokens(const FString& AccessToken, const FString& IdToken);
+	FDSAuthenticationResult GetAuthResult() const;
 private:
 	UPROPERTY()
 	FDSAuthenticationResult AuthenticationResult;
