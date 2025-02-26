@@ -6,6 +6,7 @@
 #include "Blueprint/UserWidget.h"
 #include "AccountDropdown_Expanded.generated.h"
 
+class UDSLocalPlayerSubsystem;
 /**
  * 
  */
@@ -54,4 +55,6 @@ private:
 	TObjectPtr<UPortalManager> PortalManager;
 
 	void SetSignOutButtonStyleTransparent();
+
+	UDSLocalPlayerSubsystem* GetLocalPlayerSubsystem();
 };

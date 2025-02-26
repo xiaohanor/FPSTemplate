@@ -11,7 +11,8 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "Player/DSLocalPlayerSubsystem.h"
 #include "UI/HTTP/HTTPRequestTypes.h"
-#include "UI/Portal/PortalHUD.h"
+#include "UI/Interfaces/HUDManagement.h"
+#include "GameFramework/HUD.h"
 
 void UPortalManager::SignIn(const FString& Username, const FString& Password)
 {
@@ -59,16 +60,18 @@ void UPortalManager::SignIn_Response(FHttpRequestPtr Request, FHttpResponsePtr R
 		if (IsValid(DSLocalPlayerSubsystem))
 		{
 			DSLocalPlayerSubsystem->InitializeTokens(InitiateAuthResponse.AuthenticationResult, this);
+			DSLocalPlayerSubsystem->Username = LastUsername;
+			DSLocalPlayerSubsystem->Email = InitiateAuthResponse.email;
 		}
 
 		// 登录成功后切换到 Dashboard 页面
 		APlayerController* LocalPlayerController = GEngine->GetFirstLocalPlayerController(GetWorld());
 		if (IsValid(LocalPlayerController))
 		{
-			APortalHUD* PortalHUD = Cast<APortalHUD>(LocalPlayerController->GetHUD());
-			if (IsValid(PortalHUD))
+			// 通过 HUDManagement 接口切换页面
+			if (IHUDManagement* HUDManagementInterface = Cast<IHUDManagement>(LocalPlayerController->GetHUD()))
 			{
-				PortalHUD->SignIn();
+				HUDManagementInterface->SignIn();
 			}
 		}
 	}
@@ -248,6 +251,17 @@ void UPortalManager::SignOut_Response(FHttpRequestPtr Request, FHttpResponsePtr 
 		if (ContainsErrors(JsonObject))
 		{
 			return;
+		}
+		
+		// 退出登录后切换到 SignIn 页面
+		APlayerController* LocalPlayerController = GEngine->GetFirstLocalPlayerController(GetWorld());
+		if (IsValid(LocalPlayerController))
+		{
+			// 通过 HUDManagement 接口切换页面
+			if (IHUDManagement* HUDManagementInterface = Cast<IHUDManagement>(LocalPlayerController->GetHUD()))
+			{
+				HUDManagementInterface->SignOut();
+			}
 		}
 	}
 }

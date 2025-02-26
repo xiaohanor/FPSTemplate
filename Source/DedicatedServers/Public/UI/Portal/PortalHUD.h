@@ -26,6 +26,7 @@ public:
 
 	// IHUDManagement 接口
 	virtual void SignIn() override;
+	virtual void SignOut() override;
 
 protected:
 	virtual void BeginPlay() override;
