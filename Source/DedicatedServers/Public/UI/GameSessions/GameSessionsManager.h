@@ -3,12 +3,15 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Interfaces/IHttpRequest.h"
 #include "UI/HTTP/HTTPRequestManager.h"
 #include "GameSessionsManager.generated.h"
 
 /**
  * 
  */
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FBroadcastJoinGameSessionMessage, const FString&, StatusMessage, bool, bShouldResetJoinGameButton);
+
 UCLASS()
 class DEDICATEDSERVERS_API UGameSessionsManager : public UHTTPRequestManager
 {
@@ -16,7 +19,11 @@ class DEDICATEDSERVERS_API UGameSessionsManager : public UHTTPRequestManager
 
 public:
 	UPROPERTY(BlueprintAssignable)
-	FAPIStatusMessage BroadcastJoinGameSession;
+	FBroadcastJoinGameSessionMessage BroadcastJoinGameSessionMessage;
 
 	void JoinGameSession();
+
+private:
+	void FindOrCreateGameSession_Response(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);
+
 };

@@ -48,7 +48,7 @@ void UPortalManager::SignIn_Response(FHttpRequestPtr Request, FHttpResponsePtr R
 	{
 		if (ContainsErrors(JsonObject))
 		{
-			SignInStatusMessageDelegate.Broadcast(HTTPStatusMessages::SomethingWentWrong, true);
+			SignInStatusMessageDelegate.Broadcast(TEXT("登录失败，请检查用户名和密码是否正确"), true);
 			return;
 		}
 

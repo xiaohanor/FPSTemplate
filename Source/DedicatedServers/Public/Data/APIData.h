@@ -26,7 +26,6 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly)
 	FString InvokeURL;
-
 	
 	UPROPERTY(EditDefaultsOnly)
 	FString Stage;

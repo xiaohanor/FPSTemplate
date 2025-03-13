@@ -3,9 +3,14 @@
 
 #include "UI/API/GameSessions/JoinGame.h"
 
+#include "Components/Button.h"
 #include "Components/TextBlock.h"
 
-void UJoinGame::SetStatusMessage(const FString& StatusMessage)
+void UJoinGame::SetStatusMessage(const FString& StatusMessage, bool bShouldResetJoinGameButton)
 {
 	TextBlock_StatusMessage->SetText(FText::FromString(StatusMessage));
+	if (bShouldResetJoinGameButton)
+	{
+		Button_JoinGame->SetIsEnabled(true);
+	}
 }

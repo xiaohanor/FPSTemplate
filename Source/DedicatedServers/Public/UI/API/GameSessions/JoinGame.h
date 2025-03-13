@@ -23,5 +23,6 @@ public:
 	UPROPERTY(meta=(BindWidget))
 	TObjectPtr<UTextBlock> TextBlock_StatusMessage;
 
-	void SetStatusMessage(const FString& StatusMessage);
+	UFUNCTION()
+	void SetStatusMessage(const FString& StatusMessage, bool bShouldResetJoinGameButton);
 };

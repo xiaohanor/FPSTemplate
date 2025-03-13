@@ -13,7 +13,6 @@ class UButton;
 class USignInPage;
 class UWidgetSwitcher;
 class UPortalManager;
-class UJoinGame;
 /**
  * 
  */
