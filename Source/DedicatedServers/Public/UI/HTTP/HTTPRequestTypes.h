@@ -1,5 +1,4 @@
 ﻿#pragma once
-#include "DedicatedServers/DedicatedServers.h"
 
 #include "HTTPRequestTypes.generated.h"
 
@@ -150,7 +149,17 @@ struct FDSPlayerSession
 
 	// Method to log the property values
 	void Dump() const;
-	
+};
+
+USTRUCT()
+struct FDSPlayerSessionResponse
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+	FDSPlayerSession PlayerSession;
+
+	void Dump() const;
 };
 
 USTRUCT()

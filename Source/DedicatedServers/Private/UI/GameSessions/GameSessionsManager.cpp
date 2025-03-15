@@ -133,8 +133,9 @@ void UGameSessionsManager::CreatePlayerSession_Response(FHttpRequestPtr Request,
 			BroadcastJoinGameSessionMessage.Broadcast(HTTPStatusMessages::SomethingWentWrong, true);
 		}
  
-		FDSPlayerSession PlayerSession;
+		FDSPlayerSessionResponse PlayerSession;
 		FJsonObjectConverter::JsonObjectToUStruct(JsonObject.ToSharedRef(), &PlayerSession);
+		PlayerSession.Dump();
 
 		APlayerController* LocalPlayerController = GEngine->GetFirstLocalPlayerController(GetWorld());
 		if (IsValid(LocalPlayerController))
@@ -144,7 +145,7 @@ void UGameSessionsManager::CreatePlayerSession_Response(FHttpRequestPtr Request,
 			LocalPlayerController->SetShowMouseCursor(false);
 		}
 		
-		const FString IpAndPort = PlayerSession.IpAddress + TEXT(":") + FString::FromInt(PlayerSession.Port);
+		const FString IpAndPort = PlayerSession.PlayerSession.IpAddress + TEXT(":") + FString::FromInt(PlayerSession.PlayerSession.Port);
 		const FName Address(*IpAndPort);
 		UGameplayStatics::OpenLevel(this, Address);
 	}
