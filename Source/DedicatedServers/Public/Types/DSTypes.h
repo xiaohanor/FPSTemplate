@@ -20,6 +20,16 @@ enum class ECountdownTimerType : uint8
 	PostMatch UMETA(DisplayName = "Post Match"),
 	None UMETA(DisplayName = "None")
 };
+
+UENUM()
+enum class EMatchStatus : uint8
+{
+	WaitingForPlayers,
+	PreMatch,
+	Match,
+	PostMatch,
+	SeamlessTravelling
+};
  
 USTRUCT(BlueprintType)
 struct FCountdownTimerHandle
@@ -31,7 +41,7 @@ struct FCountdownTimerHandle
 	ECountdownTimerState State = ECountdownTimerState::NotStarted;
 
 	// 定时器类型
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
 	ECountdownTimerType Type = ECountdownTimerType::None;
 
 	// 倒计时时间

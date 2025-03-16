@@ -23,16 +23,7 @@ void ADS_GameModeBase::StartCountdownTimer(FCountdownTimerHandle& CountdownTimer
 	// 绑定定时器更新委托，使用WeakLambda，避免循环引用
 	CountdownTimerHandle.TimerUpdateDelegate.BindWeakLambda(this, [&]()
 	{
-		for (FConstPlayerControllerIterator Iterator = GetWorld()->GetPlayerControllerIterator(); Iterator; ++Iterator)
-		{
-			ADSPlayerController* DSPlayerController = Cast<ADSPlayerController>(Iterator->Get());
-			if (IsValid(DSPlayerController))
-			{
-				// 计算剩余时间：总时间 - 已经过去的时间
-				const float CountdownTimeLeft = CountdownTimerHandle.CountdownTime - GetWorldTimerManager().GetTimerElapsed(CountdownTimerHandle.TimerFinishedHandle);
-				DSPlayerController->Client_TimerUpdated(CountdownTimeLeft, CountdownTimerHandle.Type);
-			}
-		}
+		UpdateCountdownTimer(CountdownTimerHandle);
 	});
 	// 根据 CountdownUpdateInterval 向所有玩家发送定时器更新
 	GetWorldTimerManager().SetTimer(
@@ -40,6 +31,8 @@ void ADS_GameModeBase::StartCountdownTimer(FCountdownTimerHandle& CountdownTimer
 		CountdownTimerHandle.TimerUpdateDelegate,
 		CountdownTimerHandle.CountdownUpdateInterval,
 		true);
+	// 立即更新定时器，否则会等待 CountdownUpdateInterval 后才更新
+	UpdateCountdownTimer(CountdownTimerHandle);
 }
 
 void ADS_GameModeBase::StopCountdownTimer(FCountdownTimerHandle& CountdownTimerHandle)
@@ -65,6 +58,21 @@ void ADS_GameModeBase::StopCountdownTimer(FCountdownTimerHandle& CountdownTimerH
 		if (IsValid(DSPlayerController))
 		{
 			DSPlayerController->Client_TimerStopped(0.f, CountdownTimerHandle.Type);
+		}
+	}
+}
+
+void ADS_GameModeBase::UpdateCountdownTimer(const FCountdownTimerHandle& CountdownTimerHandle) const
+{
+	// 通知所有玩家定时器已更新
+	for (FConstPlayerControllerIterator Iterator = GetWorld()->GetPlayerControllerIterator(); Iterator; ++Iterator)
+	{
+		ADSPlayerController* DSPlayerController = Cast<ADSPlayerController>(Iterator->Get());
+		if (IsValid(DSPlayerController))
+		{
+			// 计算剩余时间：总时间 - 已经过去的时间
+			const float CountdownTimeLeft = CountdownTimerHandle.CountdownTime - GetWorldTimerManager().GetTimerElapsed(CountdownTimerHandle.TimerFinishedHandle);
+			DSPlayerController->Client_TimerUpdated(CountdownTimeLeft, CountdownTimerHandle.Type);
 		}
 	}
 }

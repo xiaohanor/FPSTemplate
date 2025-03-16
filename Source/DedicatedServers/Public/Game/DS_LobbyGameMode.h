@@ -3,28 +3,27 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameLiftServerSDK.h"
-#include "GameFramework/GameMode.h"
-#include "DS_GameMode.generated.h"
+#include "DS_GameModeBase.h"
+#include "DS_LobbyGameMode.generated.h"
 
+struct FServerParameters;
+class UDS_GameInstanceSubsystem;
 /**
  * 
  */
-
-DECLARE_LOG_CATEGORY_EXTERN(LogDS_GameMode, Log, All);
-
 UCLASS()
-class DEDICATEDSERVERS_API ADS_GameMode : public AGameMode
+class DEDICATEDSERVERS_API ADS_LobbyGameMode : public ADS_GameModeBase
 {
 	GENERATED_BODY()
-public:
 
 protected:
 	virtual void BeginPlay() override;
 
 private:
-	FProcessParameters ProcessParameters;
+
+	UPROPERTY()
+	TObjectPtr<UDS_GameInstanceSubsystem> DSGameInstanceSubsystem;
+
 	void InitGameLift();
 	void SetServerParameters(FServerParameters& OutServerParameters);
-	void ParseCommandLinePort(int32& OutPort);
 };
