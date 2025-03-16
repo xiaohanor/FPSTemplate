@@ -25,10 +25,12 @@ USTRUCT(BlueprintType)
 struct FCountdownTimerHandle
 {
 	GENERATED_BODY()
- 
+
+	// 定时器状态
 	UPROPERTY(BlueprintReadWrite)
 	ECountdownTimerState State = ECountdownTimerState::NotStarted;
- 
+
+	// 定时器类型
 	UPROPERTY(BlueprintReadWrite)
 	ECountdownTimerType Type = ECountdownTimerType::None;
 
