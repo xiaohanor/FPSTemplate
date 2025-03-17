@@ -25,6 +25,7 @@ protected:
 	virtual void OnCountdownTimerFinished(ECountdownTimerType Type) override;
 	void CancelCountdown();
 	virtual void Logout(AController* Exiting) override;
+	virtual void PreLogin(const FString& Options, const FString& Address, const FUniqueNetIdRepl& UniqueId, FString& ErrorMessage) override;
 	// 无缝旅行时初始化玩家，用于从比赛地图返回大厅地图时
 	virtual void InitSeamlessTravelPlayer(AController* NewController) override;
 

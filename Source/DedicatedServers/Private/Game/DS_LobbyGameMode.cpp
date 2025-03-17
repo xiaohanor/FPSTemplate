@@ -4,6 +4,7 @@
 #include "Game/DS_LobbyGameMode.h"
 #include "Game/DS_GameInstanceSubsystem.h"
 #include "DedicatedServers/DedicatedServers.h"
+#include "Kismet/GameplayStatics.h"
 
 ADS_LobbyGameMode::ADS_LobbyGameMode()
 {
@@ -48,6 +49,14 @@ void ADS_LobbyGameMode::Logout(AController* Exiting)
 	Super::Logout(Exiting);
 
 	CancelCountdown();
+}
+
+void ADS_LobbyGameMode::PreLogin(const FString& Options, const FString& Address, const FUniqueNetIdRepl& UniqueId, FString& ErrorMessage)
+{
+	Super::PreLogin(Options, Address, UniqueId, ErrorMessage);
+ 
+	const FString PlayerSessionId = UGameplayStatics::ParseOption(Options, TEXT("PlayerSessionId"));
+	const FString Username = UGameplayStatics::ParseOption(Options, TEXT("Username"));
 }
 
 void ADS_LobbyGameMode::InitSeamlessTravelPlayer(AController* NewController)

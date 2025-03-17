@@ -78,8 +78,13 @@ void UGameSessionsManager::HandleGameSessionStatus(const FString& Status, const 
 	if (Status.Equals(TEXT("ACTIVE")))
 	{
 		BroadcastJoinGameSessionMessage.Broadcast(TEXT("正在加入游戏会话..."), false);
-		TryCreatePlayerSession(GetUniquePlayerId(), SessionId);
+		// 创建玩家会话
+		if (UDSLocalPlayerSubsystem* DSLocalPlayerSubsystem = GetDSLocalPlayerSubsystem(); IsValid(DSLocalPlayerSubsystem))
+		{
+			TryCreatePlayerSession(DSLocalPlayerSubsystem->Username, SessionId);
+		}
 	}
+	// 如果游戏会话正在激活中，则等待0.5秒后再次尝试加入
 	else if (Status.Equals(TEXT("ACTIVATING")))
 	{
 		FTimerDelegate CreateSessionDelegate;
@@ -133,9 +138,9 @@ void UGameSessionsManager::CreatePlayerSession_Response(FHttpRequestPtr Request,
 			BroadcastJoinGameSessionMessage.Broadcast(HTTPStatusMessages::SomethingWentWrong, true);
 		}
  
-		FDSPlayerSessionResponse PlayerSession;
-		FJsonObjectConverter::JsonObjectToUStruct(JsonObject.ToSharedRef(), &PlayerSession);
-		PlayerSession.Dump();
+		FDSPlayerSessionResponse PlayerSessionResponse;
+		FJsonObjectConverter::JsonObjectToUStruct(JsonObject.ToSharedRef(), &PlayerSessionResponse);
+		PlayerSessionResponse.Dump();
 
 		APlayerController* LocalPlayerController = GEngine->GetFirstLocalPlayerController(GetWorld());
 		if (IsValid(LocalPlayerController))
@@ -145,8 +150,9 @@ void UGameSessionsManager::CreatePlayerSession_Response(FHttpRequestPtr Request,
 			LocalPlayerController->SetShowMouseCursor(false);
 		}
 		
-		const FString IpAndPort = PlayerSession.PlayerSession.IpAddress + TEXT(":") + FString::FromInt(PlayerSession.PlayerSession.Port);
+		const FString Options = "?PlayerSessionId=" + PlayerSessionResponse.PlayerSession.PlayerSessionId + "?Username=" + PlayerSessionResponse.PlayerSession.PlayerId;
+		const FString IpAndPort = PlayerSessionResponse.PlayerSession.IpAddress + TEXT(":") + FString::FromInt(PlayerSessionResponse.PlayerSession.Port);
 		const FName Address(*IpAndPort);
-		UGameplayStatics::OpenLevel(this, Address);
+		UGameplayStatics::OpenLevel(this, Address, true, Options);
 	}
 }
