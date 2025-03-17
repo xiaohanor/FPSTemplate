@@ -5,11 +5,66 @@
 #include "Game/DS_GameInstanceSubsystem.h"
 #include "DedicatedServers/DedicatedServers.h"
 
+ADS_LobbyGameMode::ADS_LobbyGameMode()
+{
+	bUseSeamlessTravel = true;
+	LobbyStatus = ELobbyStatus::WaitingForPlayers;
+	MinPlayers = 1;
+	LobbyCountdownTimer.Type = ECountdownTimerType::LobbyCountdown;
+}
+
+void ADS_LobbyGameMode::PostLogin(APlayerController* NewPlayer)
+{
+	Super::PostLogin(NewPlayer);
+
+	// 如果玩家数量大于等于最小玩家数量并且大厅状态为等待玩家，则开始倒计时
+	if (GetNumPlayers() >= MinPlayers && LobbyStatus == ELobbyStatus::WaitingForPlayers)
+	{
+		LobbyStatus = ELobbyStatus::CountdownToSeamlessTravel;
+		StartCountdownTimer(LobbyCountdownTimer);
+	}
+}
+
 void ADS_LobbyGameMode::BeginPlay()
 {
 	Super::BeginPlay();
 
 	InitGameLift();
+}
+
+void ADS_LobbyGameMode::OnCountdownTimerFinished(ECountdownTimerType Type)
+{
+	Super::OnCountdownTimerFinished(Type);
+
+	if (Type == ECountdownTimerType::LobbyCountdown)
+	{
+		LobbyStatus = ELobbyStatus::SeamlessTravelling;
+		TrySeamlessTravel(MapToTravelTo);
+	}
+}
+
+void ADS_LobbyGameMode::Logout(AController* Exiting)
+{
+	Super::Logout(Exiting);
+
+	CancelCountdown();
+}
+
+void ADS_LobbyGameMode::InitSeamlessTravelPlayer(AController* NewController)
+{
+	Super::InitSeamlessTravelPlayer(NewController);
+
+	CancelCountdown();
+}
+
+void ADS_LobbyGameMode::CancelCountdown()
+{
+	// 如果玩家数量小于最小玩家数量并且大厅状态为倒计时中，则取消倒计时，GetNumPlayers() - 1 是因为退出的玩家还没真正退出
+	if (GetNumPlayers() - 1 < MinPlayers && LobbyStatus == ELobbyStatus::CountdownToSeamlessTravel)
+	{
+		LobbyStatus = ELobbyStatus::WaitingForPlayers;
+		StopCountdownTimer(LobbyCountdownTimer);
+	}
 }
 
 void ADS_LobbyGameMode::InitGameLift()

@@ -20,4 +20,5 @@ protected:
 	void StopCountdownTimer(FCountdownTimerHandle& CountdownTimerHandle);
 	void UpdateCountdownTimer(const FCountdownTimerHandle& CountdownTimerHandle) const;
 	virtual void OnCountdownTimerFinished(ECountdownTimerType Type);
+	void TrySeamlessTravel(TSoftObjectPtr<UWorld> DestinationMap);
 };

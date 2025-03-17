@@ -15,14 +15,36 @@ UCLASS()
 class DEDICATEDSERVERS_API ADS_LobbyGameMode : public ADS_GameModeBase
 {
 	GENERATED_BODY()
-
+	
+public:
+	ADS_LobbyGameMode();
+	// 玩家登录时调用
+	virtual void PostLogin(APlayerController* NewPlayer) override;
 protected:
 	virtual void BeginPlay() override;
-
-private:
+	virtual void OnCountdownTimerFinished(ECountdownTimerType Type) override;
+	void CancelCountdown();
+	virtual void Logout(AController* Exiting) override;
+	// 无缝旅行时初始化玩家，用于从比赛地图返回大厅地图时
+	virtual void InitSeamlessTravelPlayer(AController* NewController) override;
 
 	UPROPERTY()
+	ELobbyStatus LobbyStatus;
+
+	// 开始比赛的最小玩家数量
+	UPROPERTY(EditDefaultsOnly)
+	int32 MinPlayers;
+
+	// 用于无缝旅行的地图
+	UPROPERTY(EditDefaultsOnly)
+	TSoftObjectPtr<UWorld> MapToTravelTo;
+
+private:
+	UPROPERTY()
 	TObjectPtr<UDS_GameInstanceSubsystem> DSGameInstanceSubsystem;
+
+	UPROPERTY(EditDefaultsOnly)
+	FCountdownTimerHandle LobbyCountdownTimer;
 
 	void InitGameLift();
 	void SetServerParameters(FServerParameters& OutServerParameters);
