@@ -418,6 +418,15 @@ void AShooterCharacter::WeaponReplicated_Implementation()
 	}
 }
 
+void AShooterCharacter::EnableGameActions_Implementation(bool bEnable)
+{
+	bEnableGameActions = bEnable;
+	if (!bEnable && IsValid(Combat))
+	{
+		Combat->Initiate_FireWeapon_Released();
+	}
+}
+
 
 
 

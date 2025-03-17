@@ -33,18 +33,18 @@ void ADS_MatchGameMode::OnCountdownTimerFinished(ECountdownTimerType Type)
 	{
 		MatchStatus = EMatchStatus::Match;
 		StartCountdownTimer(MatchTimer);
+		SetClientInputEnabled(true);
 	}
 	if (Type == ECountdownTimerType::Match)
 	{
 		MatchStatus = EMatchStatus::PostMatch;
 		StartCountdownTimer(PostMatchTimer);
-		SetClientInputEnabled(true);
+		SetClientInputEnabled(false);
 	}
 	if (Type == ECountdownTimerType::PostMatch)
 	{
 		MatchStatus = EMatchStatus::SeamlessTravelling;
 		TrySeamlessTravel(LobbyMap);
-		SetClientInputEnabled(false);
 	}
 }
 
