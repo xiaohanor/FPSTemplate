@@ -3,6 +3,8 @@
 
 #include "Game/DS_MatchGameMode.h"
 
+#include "Player/DSPlayerController.h"
+
 ADS_MatchGameMode::ADS_MatchGameMode()
 {
 	bUseSeamlessTravel = true;
@@ -36,11 +38,25 @@ void ADS_MatchGameMode::OnCountdownTimerFinished(ECountdownTimerType Type)
 	{
 		MatchStatus = EMatchStatus::PostMatch;
 		StartCountdownTimer(PostMatchTimer);
+		SetClientInputEnabled(true);
 	}
 	if (Type == ECountdownTimerType::PostMatch)
 	{
 		MatchStatus = EMatchStatus::SeamlessTravelling;
 		TrySeamlessTravel(LobbyMap);
+		SetClientInputEnabled(false);
+	}
+}
+
+void ADS_MatchGameMode::SetClientInputEnabled(bool bEnabled)
+{
+	for (FConstPlayerControllerIterator Iterator = GetWorld()->GetPlayerControllerIterator(); Iterator; ++Iterator)
+	{
+		ADSPlayerController* DSPlayerController = Cast<ADSPlayerController>(Iterator->Get());
+		if (IsValid(DSPlayerController))
+		{
+			DSPlayerController->Client_SetInputEnabled(bEnabled);
+		}
 	}
 }
 

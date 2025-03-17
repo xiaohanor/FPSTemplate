@@ -22,6 +22,7 @@ public:
  
 protected:
 	virtual void OnCountdownTimerFinished(ECountdownTimerType Type) override;
+	void SetClientInputEnabled(bool bEnabled);
  
 	UPROPERTY(EditDefaultsOnly)
 	FCountdownTimerHandle PreMatchTimer;
