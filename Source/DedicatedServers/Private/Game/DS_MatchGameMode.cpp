@@ -48,6 +48,12 @@ void ADS_MatchGameMode::OnCountdownTimerFinished(ECountdownTimerType Type)
 	}
 }
 
+void ADS_MatchGameMode::Logout(AController* Exiting)
+{
+	Super::Logout(Exiting);
+	RemovePlayerSession(Exiting);
+}
+
 void ADS_MatchGameMode::SetClientInputEnabled(bool bEnabled)
 {
 	for (FConstPlayerControllerIterator Iterator = GetWorld()->GetPlayerControllerIterator(); Iterator; ++Iterator)
