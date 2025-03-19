@@ -12,7 +12,6 @@ void ADS_GameModeBase::StartCountdownTimer(FCountdownTimerHandle& CountdownTimer
 	// 绑定定时器结束委托，使用WeakLambda，避免循环引用
 	CountdownTimerHandle.TimerFinishedDelegate.BindWeakLambda(this, [&]()
 	 {
-		 StopCountdownTimer(CountdownTimerHandle);
 		 OnCountdownTimerFinished(CountdownTimerHandle.Type);
 	 });
 	// 倒计时结束后触发定时器结束委托

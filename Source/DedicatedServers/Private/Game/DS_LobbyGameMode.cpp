@@ -40,6 +40,7 @@ void ADS_LobbyGameMode::OnCountdownTimerFinished(ECountdownTimerType Type)
 
 	if (Type == ECountdownTimerType::LobbyCountdown)
 	{
+		StopCountdownTimer(LobbyCountdownTimer);
 		LobbyStatus = ELobbyStatus::SeamlessTravelling;
 		TrySeamlessTravel(MapToTravelTo);
 	}
@@ -49,7 +50,7 @@ void ADS_LobbyGameMode::Logout(AController* Exiting)
 {
 	Super::Logout(Exiting);
 
-	CancelCountdown();
+	CheckAndStopLobbyCountdown();
 }
 
 void ADS_LobbyGameMode::PreLogin(const FString& Options, const FString& Address, const FUniqueNetIdRepl& UniqueId, FString& ErrorMessage)
@@ -129,10 +130,19 @@ void ADS_LobbyGameMode::InitSeamlessTravelPlayer(AController* NewController)
 {
 	Super::InitSeamlessTravelPlayer(NewController);
 
-	CancelCountdown();
+	CheckAndStartLobbyCountdown();
 }
 
-void ADS_LobbyGameMode::CancelCountdown()
+void ADS_LobbyGameMode::CheckAndStartLobbyCountdown()
+{
+	if (GetNumPlayers() >= MinPlayers && LobbyStatus == ELobbyStatus::WaitingForPlayers)
+	{
+		LobbyStatus = ELobbyStatus::CountdownToSeamlessTravel;
+		StartCountdownTimer(LobbyCountdownTimer);
+	}
+}
+
+void ADS_LobbyGameMode::CheckAndStopLobbyCountdown()
 {
 	// 如果玩家数量小于最小玩家数量并且大厅状态为倒计时中，则取消倒计时，GetNumPlayers() - 1 是因为退出的玩家还没真正退出
 	if (GetNumPlayers() - 1 < MinPlayers && LobbyStatus == ELobbyStatus::CountdownToSeamlessTravel)

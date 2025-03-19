@@ -23,12 +23,14 @@ public:
 protected:
 	virtual void BeginPlay() override;
 	virtual void OnCountdownTimerFinished(ECountdownTimerType Type) override;
-	void CancelCountdown();
 	virtual void Logout(AController* Exiting) override;
 	virtual void PreLogin(const FString& Options, const FString& Address, const FUniqueNetIdRepl& UniqueId, FString& ErrorMessage) override;
 	virtual FString InitNewPlayer(APlayerController* NewPlayerController, const FUniqueNetIdRepl& UniqueId, const FString& Options, const FString& Portal = L"") override;
 	// 无缝旅行时初始化玩家，用于从比赛地图返回大厅地图时
 	virtual void InitSeamlessTravelPlayer(AController* NewController) override;
+
+	void CheckAndStartLobbyCountdown();
+	void CheckAndStopLobbyCountdown();
 
 	UPROPERTY()
 	ELobbyStatus LobbyStatus;

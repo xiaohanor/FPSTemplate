@@ -15,7 +15,9 @@ class DEDICATEDSERVERS_API ADS_MatchGameMode : public ADS_GameModeBase
 	GENERATED_BODY()
 public:
 	ADS_MatchGameMode();
+	// 启用无缝旅行后将执行 InitSeamlessTravelPlayer 而不是 PostLogin
 	virtual void PostLogin(APlayerController* NewPlayer) override;
+	virtual void InitSeamlessTravelPlayer(AController* NewController) override;
  
 	UPROPERTY()
 	EMatchStatus MatchStatus;
