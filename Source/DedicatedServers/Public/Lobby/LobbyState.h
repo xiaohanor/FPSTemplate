@@ -38,13 +38,14 @@ public:
  
 	void AddPlayerInfo(const FLobbyPlayerInfo& PlayerInfo);
 	void RemovePlayerInfo(const FString& Username);
+	TArray<FLobbyPlayerInfo> GetPlayers() const;
+	
 protected:
- 
+	
 	UFUNCTION()
 	void OnRep_LobbyPlayerInfo();
  	
 private:
- 
 	UPROPERTY(ReplicatedUsing=OnRep_LobbyPlayerInfo)
 	FLobbyPlayerInfoArray PlayerInfoArray;
 

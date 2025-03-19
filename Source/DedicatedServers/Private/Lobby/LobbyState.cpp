@@ -80,4 +80,9 @@ FLobbyPlayerInfoDelta ALobbyState::ComputePlayerInfoDelta(const TArray<FLobbyPla
 	return Delta;
 }
 
+TArray<FLobbyPlayerInfo> ALobbyState::GetPlayers() const
+{
+	return PlayerInfoArray.Players;
+}
+
 
