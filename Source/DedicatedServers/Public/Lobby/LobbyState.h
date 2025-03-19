@@ -7,6 +7,18 @@
 #include "GameFramework/Info.h"
 #include "LobbyState.generated.h"
 
+USTRUCT()
+struct FLobbyPlayerInfoDelta
+{
+	GENERATED_BODY()
+ 
+	UPROPERTY()
+	TArray<FLobbyPlayerInfo> AddedPlayers{};
+ 
+	UPROPERTY()
+	TArray<FLobbyPlayerInfo> RemovedPlayers{};
+};
+
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPlayerInfoChanged, const FLobbyPlayerInfo&, PlayerInfo);
 
 UCLASS()
@@ -34,7 +46,12 @@ protected:
 private:
  
 	UPROPERTY(ReplicatedUsing=OnRep_LobbyPlayerInfo)
-		FLobbyPlayerInfoArray PlayerInfoArray;
+	FLobbyPlayerInfoArray PlayerInfoArray;
 
-	
+	// 用于存储上一次同步的玩家信息，用于计算玩家信息的变化
+	UPROPERTY()
+	FLobbyPlayerInfoArray LastPlayerInfoArray;
+
+	// 计算玩家信息的变化，用于网络传输
+	FLobbyPlayerInfoDelta ComputePlayerInfoDelta(const TArray<FLobbyPlayerInfo>& OldArray, const TArray<FLobbyPlayerInfo>& NewArray);
 };
