@@ -4,7 +4,10 @@
 #include "Game/DS_LobbyGameMode.h"
 #include "Game/DS_GameInstanceSubsystem.h"
 #include "DedicatedServers/DedicatedServers.h"
+#include "Game/DS_GameState.h"
 #include "Kismet/GameplayStatics.h"
+#include "Lobby/LobbyPlayerInfo.h"
+#include "Lobby/LobbyState.h"
 #include "Player/DSPlayerController.h"
 
 ADS_LobbyGameMode::ADS_LobbyGameMode()
@@ -19,12 +22,7 @@ void ADS_LobbyGameMode::PostLogin(APlayerController* NewPlayer)
 {
 	Super::PostLogin(NewPlayer);
 
-	// 如果玩家数量大于等于最小玩家数量并且大厅状态为等待玩家，则开始倒计时
-	if (GetNumPlayers() >= MinPlayers && LobbyStatus == ELobbyStatus::WaitingForPlayers)
-	{
-		LobbyStatus = ELobbyStatus::CountdownToSeamlessTravel;
-		StartCountdownTimer(LobbyCountdownTimer);
-	}
+	CheckAndStartLobbyCountdown();
 }
 
 void ADS_LobbyGameMode::BeginPlay()
@@ -51,6 +49,10 @@ void ADS_LobbyGameMode::Logout(AController* Exiting)
 	Super::Logout(Exiting);
 
 	CheckAndStopLobbyCountdown();
+	if (LobbyStatus != ELobbyStatus::SeamlessTravelling)
+	{
+		RemovePlayerInfoFromLobbyState(Exiting);
+	}
 }
 
 void ADS_LobbyGameMode::PreLogin(const FString& Options, const FString& Address, const FUniqueNetIdRepl& UniqueId, FString& ErrorMessage)
@@ -73,6 +75,11 @@ FString ADS_LobbyGameMode::InitNewPlayer(APlayerController* NewPlayerController,
 	{
 		DSPlayerController->PlayerSessionId = PlayerSessionId;
 		DSPlayerController->Username = Username;
+	}
+	
+	if (LobbyStatus != ELobbyStatus::SeamlessTravelling)
+	{
+		AddPlayerInfoToLobbyState(NewPlayerController);
 	}
  
 	return InitializedString;
@@ -131,6 +138,10 @@ void ADS_LobbyGameMode::InitSeamlessTravelPlayer(AController* NewController)
 	Super::InitSeamlessTravelPlayer(NewController);
 
 	CheckAndStartLobbyCountdown();
+	if (LobbyStatus != ELobbyStatus::SeamlessTravelling)
+	{
+		AddPlayerInfoToLobbyState(NewController);
+	}
 }
 
 void ADS_LobbyGameMode::CheckAndStartLobbyCountdown()
@@ -149,6 +160,26 @@ void ADS_LobbyGameMode::CheckAndStopLobbyCountdown()
 	{
 		LobbyStatus = ELobbyStatus::WaitingForPlayers;
 		StopCountdownTimer(LobbyCountdownTimer);
+	}
+}
+
+void ADS_LobbyGameMode::AddPlayerInfoToLobbyState(AController* Player) const
+{
+	ADSPlayerController* DSPlayerController = Cast<ADSPlayerController>(Player);
+	ADS_GameState* DSGameState = GetGameState<ADS_GameState>();
+	if (IsValid(DSGameState) && IsValid(DSGameState->LobbyState) && IsValid(DSPlayerController))
+	{
+		FLobbyPlayerInfo PlayerInfo(DSPlayerController->Username);
+		DSGameState->LobbyState->AddPlayerInfo(PlayerInfo);
+	}
+}
+void ADS_LobbyGameMode::RemovePlayerInfoFromLobbyState(AController* Player) const
+{
+	ADSPlayerController* DSPlayerController = Cast<ADSPlayerController>(Player);
+	ADS_GameState* DSGameState = GetGameState<ADS_GameState>();
+	if (IsValid(DSGameState) && IsValid(DSGameState->LobbyState) && IsValid(DSPlayerController))
+	{
+		DSGameState->LobbyState->RemovePlayerInfo(DSPlayerController->Username);
 	}
 }
 

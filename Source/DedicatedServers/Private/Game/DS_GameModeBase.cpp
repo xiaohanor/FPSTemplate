@@ -85,7 +85,7 @@ void ADS_GameModeBase::OnCountdownTimerFinished(ECountdownTimerType Type)
 
 void ADS_GameModeBase::TrySeamlessTravel(TSoftObjectPtr<UWorld> DestinationMap)
 {
-	const FString MapName = DestinationMap.ToSoftObjectPath().GetAssetName();
+	const FString MapName = DestinationMap.ToSoftObjectPath().GetLongPackageName();
 	if (GIsEditor)
 	{
 		UGameplayStatics::OpenLevelBySoftObjectPtr(this, DestinationMap);
