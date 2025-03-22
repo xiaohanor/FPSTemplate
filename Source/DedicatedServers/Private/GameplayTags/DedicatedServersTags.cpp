@@ -18,5 +18,6 @@ namespace DedicatedServersTags
 	namespace GameStatsAPI
 	{
 		UE_DEFINE_GAMEPLAY_TAG_COMMENT(RecordMatchStats, "DedicatedServersTags.GameStatsAPI.RecordMatchStats","Record Match Stats on GameStats API");
+		UE_DEFINE_GAMEPLAY_TAG_COMMENT(RetrieveMatchStats, "DedicatedServersTags.GameStatsAPI.RetrieveMatchStats","Retrieve Match Stats on GameStats API");
 	}
 }

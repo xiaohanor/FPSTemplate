@@ -26,6 +26,7 @@ protected:
 	virtual void OnCountdownTimerFinished(ECountdownTimerType Type) override;
 	virtual void Logout(AController* Exiting) override;
 	void SetClientInputEnabled(bool bEnabled);
+	void OnMatchEnded();
  
 	UPROPERTY(EditDefaultsOnly)
 	FCountdownTimerHandle PreMatchTimer;

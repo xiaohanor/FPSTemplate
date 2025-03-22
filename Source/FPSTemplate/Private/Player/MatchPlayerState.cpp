@@ -4,12 +4,21 @@
 #include "Player/MatchPlayerState.h"
 
 #include "Data/SpecialElimData.h"
+#include "Game/MatchGameState.h"
+#include "Kismet/GameplayStatics.h"
 #include "ShooterTypes/ShooterTypes.h"
 #include "UI/Elims/SpecialElimWidget.h"
+#include "UI/HTTP/HTTPRequestTypes.h"
 
 AMatchPlayerState::AMatchPlayerState()
 {
 	NetUpdateFrequency = 100.f; // let's not be sluggish, alright?
+
+	AMatchGameState* MatchGameState = Cast<AMatchGameState>(UGameplayStatics::GetGameState(this));
+	if (IsValid(MatchGameState))
+	{
+		bWinner = MatchGameState->GetLeader() == this;
+	}
 	
 	ScoredElims = 0;
 	Defeats = 0;
@@ -24,6 +33,29 @@ AMatchPlayerState::AMatchPlayerState()
 	ShowStopperElims = 0;
 	bFirstBlood = false;
 	bWinner = false;
+}
+
+void AMatchPlayerState::OnMatchEnded(const FString& Username)
+{
+	Super::OnMatchEnded(Username);
+
+	FDSRecordMatchStatsInput RecordMatchStatsInput;
+	RecordMatchStatsInput.username = Username;
+ 
+	RecordMatchStatsInput.matchStats.scoredElims = ScoredElims;
+	RecordMatchStatsInput.matchStats.defeats = Defeats;
+	RecordMatchStatsInput.matchStats.hits = Hits;
+	RecordMatchStatsInput.matchStats.misses = Misses;
+	RecordMatchStatsInput.matchStats.headShotElims = HeadShotElims;
+	RecordMatchStatsInput.matchStats.highestStreak = HighestStreak;
+	RecordMatchStatsInput.matchStats.revengeElims = RevengeElims;
+	RecordMatchStatsInput.matchStats.dethroneElims = DethroneElims;
+	RecordMatchStatsInput.matchStats.showstopperElims = ShowStopperElims;
+	RecordMatchStatsInput.matchStats.gotFirstBlood = bFirstBlood ? 1 : 0;
+	RecordMatchStatsInput.matchStats.matchWins = bWinner ? 1 : 0;
+	RecordMatchStatsInput.matchStats.matchLosses = bWinner ? 0 : 1;
+ 
+	RecordMatchStats(RecordMatchStatsInput);
 }
 
 void AMatchPlayerState::AddScoredElim()
