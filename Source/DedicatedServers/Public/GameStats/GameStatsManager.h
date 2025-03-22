@@ -24,6 +24,9 @@ public:
 
 	UPROPERTY()
 	FOnRetrieveMatchStatsResponseReceived OnRetrieveMatchStatsResponseReceived;
+
+	UPROPERTY(BlueprintAssignable)
+	FAPIStatusMessage RetrieveMatchStatsStatusMesssage;
 	
 private:
 	void RecordMatchStats_Response(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);
