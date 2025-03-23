@@ -74,7 +74,7 @@ void UGameStatsManager::RetrieveMatchStats_Response(FHttpRequestPtr Request, FHt
 	if (!bWasSuccessful)
 	{
 		OnRetrieveMatchStatsResponseReceived.Broadcast(FDSRetrieveMatchStatsResponse());
-		RetrieveMatchStatsStatusMesssage.Broadcast(HTTPStatusMessages::SomethingWentWrong, false);
+		RetrieveMatchStatsStatusMessage.Broadcast(HTTPStatusMessages::SomethingWentWrong, false);
 		return;
 	}
  
@@ -86,7 +86,7 @@ void UGameStatsManager::RetrieveMatchStats_Response(FHttpRequestPtr Request, FHt
 		if (ContainsErrors(JsonObject))
 		{
 			OnRetrieveMatchStatsResponseReceived.Broadcast(FDSRetrieveMatchStatsResponse());
-			RetrieveMatchStatsStatusMesssage.Broadcast(HTTPStatusMessages::SomethingWentWrong, false);
+			RetrieveMatchStatsStatusMessage.Broadcast(HTTPStatusMessages::SomethingWentWrong, false);
 			return;
 		}
  
@@ -95,6 +95,107 @@ void UGameStatsManager::RetrieveMatchStats_Response(FHttpRequestPtr Request, FHt
 		RetrieveMatchStatsResponse.Dump();
  
 		OnRetrieveMatchStatsResponseReceived.Broadcast(RetrieveMatchStatsResponse);
-		RetrieveMatchStatsStatusMesssage.Broadcast(TEXT(""), false);
+		RetrieveMatchStatsStatusMessage.Broadcast(TEXT(""), false);
 	}
+}
+
+void UGameStatsManager::UpdateLeaderboard(const TArray<FString>& WinnerUsernames)
+{
+	check(APIData);
+ 	
+	TSharedRef<IHttpRequest> Request = FHttpModule::Get().CreateRequest();
+	const FString ApiUrl = APIData->GetAPIEndpoint(DedicatedServersTags::GameStatsAPI::UpdateLeaderboard);
+	Request->OnProcessRequestComplete().BindUObject(this, &UGameStatsManager::UpdateLeaderboard_Response);
+	Request->SetURL(ApiUrl);
+	Request->SetVerb("POST");
+	Request->SetHeader("Content-Type", "application/json");
+
+	// 将获胜者用户名数组转换为 JSON 字符串
+	TSharedPtr<FJsonObject> JsonObject = MakeShareable(new FJsonObject());
+	TArray<TSharedPtr<FJsonValue>> PlayerIdJsonArray;
+	
+	for (const FString& Username : WinnerUsernames)
+	{
+		// 将每个用户名转换为JSON字符串值并添加到数组中
+		PlayerIdJsonArray.Add(MakeShareable(new FJsonValueString(Username)));
+	}
+	// 将JSON值数组设置为JSON对象的"playerIds"字段
+	JsonObject->SetArrayField(TEXT("playerIds"), PlayerIdJsonArray);
+	FString Content;
+	TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&Content);
+	FJsonSerializer::Serialize(JsonObject.ToSharedRef(), Writer);
+ 	
+	Request->SetContentAsString(Content);
+	Request->ProcessRequest();
+}
+ 
+void UGameStatsManager::UpdateLeaderboard_Response(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
+{
+	if (!bWasSuccessful)
+	{
+		return;
+	}
+ 
+	TSharedPtr<FJsonObject> JsonObject;
+	TSharedRef<TJsonReader<>> JsonReader = TJsonReaderFactory<>::Create(Response->GetContentAsString());
+	if (FJsonSerializer::Deserialize(JsonReader, JsonObject))
+	{
+		if (ContainsErrors(JsonObject))
+		{
+			return;
+		}
+	}
+	OnUpdateLeaderboardSucceeded.Broadcast();
+}
+
+void UGameStatsManager::RetrieveLeaderboard()
+{
+	TSharedRef<IHttpRequest> Request = FHttpModule::Get().CreateRequest();
+	const FString ApiUrl = APIData->GetAPIEndpoint(DedicatedServersTags::GameStatsAPI::RetrieveLeaderboard);
+	Request->OnProcessRequestComplete().BindUObject(this, &UGameStatsManager::RetrieveLeaderboard_Response);
+	Request->SetURL(ApiUrl);
+	Request->SetVerb("GET");
+	Request->SetHeader("Content-Type", "application/json");
+	Request->ProcessRequest();
+}
+ 
+void UGameStatsManager::RetrieveLeaderboard_Response(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
+{
+	if (!bWasSuccessful)
+	{
+		UE_LOG(LogDedicatedServers, Error, TEXT("检索排行榜失败"))
+		return;
+	}
+ 
+	TArray<FDSLeaderboardItem> LeaderboardItems;
+	TSharedPtr<FJsonObject> JsonObject;
+	TSharedRef<TJsonReader<>> JsonReader = TJsonReaderFactory<>::Create(Response->GetContentAsString());
+	// 尝试将响应内容反序列化为JSON对象
+	if (FJsonSerializer::Deserialize(JsonReader, JsonObject))
+	{
+		// 声明一个指向JSON数组的指针，用于存储排行榜数据
+		const TArray<TSharedPtr<FJsonValue>>* LeaderboardJsonArray;
+		// 尝试从JSON对象中获取名为"Leaderboard"的数组字段
+		if (JsonObject->TryGetArrayField(TEXT("Leaderboard"), LeaderboardJsonArray))
+		{
+			for (const TSharedPtr<FJsonValue>& ItemValue : *LeaderboardJsonArray)
+			{
+				// 将JSON值转换为JSON对象
+				TSharedPtr<FJsonObject> ItemObject = ItemValue->AsObject();
+				if (ItemObject.IsValid())
+				{
+					FDSLeaderboardItem Item;
+					if (FJsonObjectConverter::JsonObjectToUStruct(ItemObject.ToSharedRef(), &Item))
+					{
+						LeaderboardItems.Add(Item);
+					}
+					else
+					{
+						UE_LOG(LogDedicatedServers, Error, TEXT("转换排行榜项目失败"))
+					}
+				}
+			}
+		}
+	}
+	OnRetrieveLeaderboard.Broadcast(LeaderboardItems);
 }

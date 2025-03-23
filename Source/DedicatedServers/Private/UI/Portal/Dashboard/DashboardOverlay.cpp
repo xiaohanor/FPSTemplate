@@ -16,7 +16,7 @@ void UDashboardOverlay::NativeConstruct()
 
 	GameStatsManager = NewObject<UGameStatsManager>(this, GameStatsManagerClass);
 	GameStatsManager->OnRetrieveMatchStatsResponseReceived.AddDynamic(CareerPage, &UCareerPage::OnRetrieveMatchStats);
-	GameStatsManager->RetrieveMatchStatsStatusMesssage.AddDynamic(CareerPage, &UCareerPage::SetStatusMessage);
+	GameStatsManager->RetrieveMatchStatsStatusMessage.AddDynamic(CareerPage, &UCareerPage::SetStatusMessage);
 
 	Button_Game->OnClicked.AddDynamic(this, &UDashboardOverlay::ShowGamePage);
 	Button_Career->OnClicked.AddDynamic(this, &UDashboardOverlay::ShowCareerPage);
