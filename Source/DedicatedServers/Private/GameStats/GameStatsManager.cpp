@@ -41,7 +41,10 @@ void UGameStatsManager::RecordMatchStats_Response(FHttpRequestPtr Request, FHttp
 	TSharedRef<TJsonReader<>> JsonReader = TJsonReaderFactory<>::Create(Response->GetContentAsString());
 	if (FJsonSerializer::Deserialize(JsonReader, JsonObject))
 	{
-		ContainsErrors(JsonObject);
+		if (ContainsErrors(JsonObject))
+		{
+			return;
+		}
 	}
 }
 

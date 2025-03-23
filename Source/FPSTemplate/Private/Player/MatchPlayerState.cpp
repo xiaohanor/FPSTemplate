@@ -13,12 +13,6 @@
 AMatchPlayerState::AMatchPlayerState()
 {
 	NetUpdateFrequency = 100.f; // let's not be sluggish, alright?
-
-	AMatchGameState* MatchGameState = Cast<AMatchGameState>(UGameplayStatics::GetGameState(this));
-	if (IsValid(MatchGameState))
-	{
-		bWinner = MatchGameState->GetLeader() == this;
-	}
 	
 	ScoredElims = 0;
 	Defeats = 0;
@@ -38,6 +32,13 @@ AMatchPlayerState::AMatchPlayerState()
 void AMatchPlayerState::OnMatchEnded(const FString& Username)
 {
 	Super::OnMatchEnded(Username);
+
+	AMatchGameState* MatchGameState = Cast<AMatchGameState>(UGameplayStatics::GetGameState(this));
+	if (IsValid(MatchGameState))
+	{
+		bWinner = MatchGameState->GetLeader() == this;
+	}
+	
 
 	FDSRecordMatchStatsInput RecordMatchStatsInput;
 	RecordMatchStatsInput.username = Username;

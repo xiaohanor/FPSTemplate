@@ -101,10 +101,11 @@ void UPortalManager::SignUp(const FString& Username, const FString& Password, co
 
 void UPortalManager::SignUp_Response(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
 {
-	if (!bWasSuccessful)
+	// 可能出现返回失败信息，但实际上注册成功的情况，保证用户能正常进入验证码页面
+	/*if (!bWasSuccessful)
 	{
 		SignUpStatusMessageDelegate.Broadcast(HTTPStatusMessages::SomethingWentWrong, true);
-	}
+	}*/
 
 	TSharedPtr<FJsonObject> JsonObject;
 	TSharedRef<TJsonReader<>> JsonReader = TJsonReaderFactory<>::Create(Response->GetContentAsString());
