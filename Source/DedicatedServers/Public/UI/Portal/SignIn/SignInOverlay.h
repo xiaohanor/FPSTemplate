@@ -47,6 +47,8 @@ private:
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<USuccessConfirmPage> SuccessConfirmedPage;
 
+	void AutoSignIn();
+
 	UFUNCTION()
 	void ShowSignInPage();
 

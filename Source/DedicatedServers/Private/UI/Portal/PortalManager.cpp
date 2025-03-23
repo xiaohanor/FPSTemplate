@@ -252,7 +252,13 @@ void UPortalManager::SignOut_Response(FHttpRequestPtr Request, FHttpResponsePtr 
 		{
 			return;
 		}
-		
+		// 清空本地存储的用户信息
+		if (UDSLocalPlayerSubsystem* LocalPlayerSubsystem = GetDSLocalPlayerSubsystem(); IsValid(LocalPlayerSubsystem))
+		{
+			LocalPlayerSubsystem->Username = "";
+			LocalPlayerSubsystem->Password = "";
+			LocalPlayerSubsystem->Email = "";
+		}
 		// 退出登录后切换到 SignIn 页面
 		APlayerController* LocalPlayerController = GEngine->GetFirstLocalPlayerController(GetWorld());
 		if (IsValid(LocalPlayerController))

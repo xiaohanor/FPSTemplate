@@ -391,6 +391,9 @@ struct FDSLeaderboardItem
  
 	UPROPERTY()
 	int32 matchWins{};
+
+	UPROPERTY()
+	int32 place{};
 };
 
 

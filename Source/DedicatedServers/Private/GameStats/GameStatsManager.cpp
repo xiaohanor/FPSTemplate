@@ -102,7 +102,7 @@ void UGameStatsManager::RetrieveMatchStats_Response(FHttpRequestPtr Request, FHt
 void UGameStatsManager::UpdateLeaderboard(const TArray<FString>& WinnerUsernames)
 {
 	check(APIData);
- 	
+
 	TSharedRef<IHttpRequest> Request = FHttpModule::Get().CreateRequest();
 	const FString ApiUrl = APIData->GetAPIEndpoint(DedicatedServersTags::GameStatsAPI::UpdateLeaderboard);
 	Request->OnProcessRequestComplete().BindUObject(this, &UGameStatsManager::UpdateLeaderboard_Response);
@@ -150,6 +150,7 @@ void UGameStatsManager::UpdateLeaderboard_Response(FHttpRequestPtr Request, FHtt
 
 void UGameStatsManager::RetrieveLeaderboard()
 {
+	RetrieveLeaderboardStatusMessage.Broadcast(TEXT("正在检索排行榜..."), false);
 	TSharedRef<IHttpRequest> Request = FHttpModule::Get().CreateRequest();
 	const FString ApiUrl = APIData->GetAPIEndpoint(DedicatedServersTags::GameStatsAPI::RetrieveLeaderboard);
 	Request->OnProcessRequestComplete().BindUObject(this, &UGameStatsManager::RetrieveLeaderboard_Response);
@@ -163,6 +164,7 @@ void UGameStatsManager::RetrieveLeaderboard_Response(FHttpRequestPtr Request, FH
 {
 	if (!bWasSuccessful)
 	{
+		RetrieveLeaderboardStatusMessage.Broadcast(HTTPStatusMessages::SomethingWentWrong, false);
 		UE_LOG(LogDedicatedServers, Error, TEXT("检索排行榜失败"))
 		return;
 	}
@@ -173,6 +175,11 @@ void UGameStatsManager::RetrieveLeaderboard_Response(FHttpRequestPtr Request, FH
 	// 尝试将响应内容反序列化为JSON对象
 	if (FJsonSerializer::Deserialize(JsonReader, JsonObject))
 	{
+		if (ContainsErrors(JsonObject))
+		{
+			RetrieveLeaderboardStatusMessage.Broadcast(HTTPStatusMessages::SomethingWentWrong, false);
+			return;
+		}
 		// 声明一个指向JSON数组的指针，用于存储排行榜数据
 		const TArray<TSharedPtr<FJsonValue>>* LeaderboardJsonArray;
 		// 尝试从JSON对象中获取名为"Leaderboard"的数组字段
@@ -198,4 +205,5 @@ void UGameStatsManager::RetrieveLeaderboard_Response(FHttpRequestPtr Request, FH
 		}
 	}
 	OnRetrieveLeaderboard.Broadcast(LeaderboardItems);
+	RetrieveLeaderboardStatusMessage.Broadcast(TEXT(""), false);
 }
