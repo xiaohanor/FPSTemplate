@@ -3,6 +3,7 @@
 
 #include "Game/DS_MatchGameMode.h"
 
+#include "GameStats/GameStatsManager.h"
 #include "Player/DSPlayerController.h"
 #include "Player/DS_MatchPlayerState.h"
 
@@ -35,6 +36,14 @@ void ADS_MatchGameMode::InitSeamlessTravelPlayer(AController* NewController)
 		MatchStatus = EMatchStatus::PreMatch;
 		StartCountdownTimer(PreMatchTimer);
 	}
+}
+
+void ADS_MatchGameMode::BeginPlay()
+{
+	Super::BeginPlay();
+
+	GameStatsManager = NewObject<UGameStatsManager>(this, GameStatsManagerClass);
+	GameStatsManager->OnUpdateLeaderboardSucceeded.AddDynamic(this, &ADS_MatchGameMode::ADS_MatchGameMode::OnLeaderboardUpdated);
 }
 
 void ADS_MatchGameMode::OnCountdownTimerFinished(ECountdownTimerType Type)
@@ -84,6 +93,11 @@ void ADS_MatchGameMode::SetClientInputEnabled(bool bEnabled)
 
 void ADS_MatchGameMode::OnMatchEnded()
 {
+	// 由子类实现
+}
+
+void ADS_MatchGameMode::EndMatchForPlayerStates()
+{
 	for (FConstPlayerControllerIterator Iterator = GetWorld()->GetPlayerControllerIterator(); Iterator; ++Iterator)
 	{
 		if (ADSPlayerController* DSPlayerController = Cast<ADSPlayerController>(Iterator->Get()); IsValid(DSPlayerController))
@@ -94,6 +108,19 @@ void ADS_MatchGameMode::OnMatchEnded()
 			}
 		}
 	}
+}
+
+void ADS_MatchGameMode::UpdateLeaderboard(const TArray<FString>& LeaderboardNames)
+{
+	if (IsValid(GameStatsManager))
+	{
+		GameStatsManager->UpdateLeaderboard(LeaderboardNames);
+	}
+}
+
+void ADS_MatchGameMode::OnLeaderboardUpdated()
+{
+	EndMatchForPlayerStates();
 }
 
 

@@ -23,8 +23,10 @@ public:
 	
 	virtual void PlayerEliminated(ACharacter* ElimmedCharacter, class APlayerController* VictimController, APlayerController* AttackerController);
 	virtual void RequestRespawn(ACharacter* ElimmedCharacter, AController* ElimmedController);
-
-
+	
 	UPROPERTY(EditDefaultsOnly, Category="Respawning")
 	float RespawnTime;
+
+protected:
+	virtual void OnMatchEnded() override;
 };
